@@ -1,0 +1,10 @@
+[
+  {
+    "input": "디렉토리 안에 있는 파일들을 보여줘",
+    "code": "import os\nprint(os.listdir())"
+  },
+  {
+    "input": "현재 시간을 알려줘",
+    "code": "import datetime\nprint(datetime.datetime.now())"
+  }
+]
