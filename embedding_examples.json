@@ -1,10 +1,94 @@
 [
   {
-    "input": "디렉토리 안에 있는 파일들을 보여줘",
-    "code": "import os\nprint(os.listdir())"
+    "input": "화면밝기 100%",
+    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 100)', shell=True)"
   },
   {
-    "input": "현재 시간을 알려줘",
-    "code": "import datetime\nprint(datetime.datetime.now())"
+    "input": "화면밝기 50%",
+    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 50)', shell=True)"
+  },
+  {
+    "input": "화면밝기 0%",
+    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 30)', shell=True)"
+  },
+  {
+    "input": "소리 100%",
+    "code": "import ctypes\nvolume = 1.0 * 65535\nctypes.windll.winmm.waveOutSetVolume(0, int(volume) + (int(volume) << 16))"
+  },
+  {
+    "input": "소리 50%",
+    "code": "import ctypes\nvolume = 0.5 * 65535\nctypes.windll.winmm.waveOutSetVolume(0, int(volume) + (int(volume) << 16))"
+  },
+  {
+    "input": "소리 0%",
+    "code": "import ctypes\nvolume = 0.0 * 65535\nctypes.windll.winmm.waveOutSetVolume(0, int(volume) + (int(volume) << 16))"
+  },
+  {
+    "input": "와이파이 목록",
+    "code": "import os\nos.system('start ms-settings:network-wifi')"
+  },
+  {
+    "input": "와이파이 연결 해제",
+    "code": "import os\nresult = os.system('netsh wlan disconnect')\nif result == 0:\n    print('✅ Wi-Fi 연결이 정상적으로 해제되었습니다.')\nelse:\n    print('❌ Wi-Fi 연결 해제에 실패했습니다.')"
+  },
+   {
+    "input": "CPU 사용률",
+    "code": "import subprocess\n\n# CPU 사용률 가져오기\nresult = subprocess.check_output('wmic cpu get loadpercentage', shell=True, encoding='utf-8')\n\n# 결과를 줄 단위로 나누기\nlines = result.split('\\n')\n\n# 숫자만 있는 줄 필터링\nusage_values = [line.strip() for line in lines if line.strip().isdigit()]\n\n# 결과 출력\nif usage_values:\n    print(f'{usage_values[0]}%')\nelse:\n    print('❌ CPU 사용률 정보를 가져오지 못했습니다.')"
+  },
+  {
+    "input": "디스크 용량",
+    "code": "import subprocess\n\n# 디스크 정보 가져오기\nresult = subprocess.check_output('wmic logicaldisk get caption,freespace,size', shell=True, encoding='utf-8')\n\n# 줄 단위로 나누기\nlines = result.strip().split('\\n')\n\nprint('디스크 용량 정보:')\nfor line in lines[1:]:\n    parts = line.split()\n    if len(parts) == 3:\n        drive, free, total = parts\n        if free.isdigit() and total.isdigit():\n            free_gb = int(free) // (1024 ** 3)\n            total_gb = int(total) // (1024 ** 3)\n            print(f'{drive}: {free_gb}GB / {total_gb}GB')"
+  },
+  {
+    "input": "인터넷 속도 측정",
+    "code": "import subprocess\nimport time\n\nprint('인터넷 속도를 측정 중입니다... 잠시만 기다려주세요.')\n\n# 테스트할 URL (Tele2의 10MB 테스트 파일)\nurl = 'http://speedtest.tele2.net/10MB.zip'\n\n# 측정 시작 시간\nstart_time = time.time()\n\n# PowerShell 명령 실행 (파일 다운로드)\nsubprocess.run(f'powershell Invoke-WebRequest -Uri \"{url}\" -OutFile NUL', shell=True)\n\n# 측정 종료 시간\nend_time = time.time()\n\n# 걸린 시간 계산\ntime_taken = end_time - start_time\n\n# 다운로드 속도 계산 (MB/s)\nif time_taken > 0:\n    download_speed = 10 / time_taken\n    print(f'다운로드 속도: {download_speed:.2f} MB/s')\nelse:\n    print('❌ 인터넷 속도 측정에 실패했습니다.')"
+  },
+  {
+    "input": "크롬 강제 종료",
+    "code": "import os\n\n# 크롬 강제 종료 실행\nprint('Chrome 브라우저를 강제로 종료합니다...')\nos.system('taskkill /F /IM chrome.exe')\nprint('모든 Chrome 프로세스가 종료되었습니다.')"
+  },
+  {
+    "input": "실행 중인 프로그램",
+    "code": "import subprocess\n\n# 실행 중인 프로그램 목록 가져오기\nprint('실행 중인 프로그램 목록을 불러옵니다...')\n\n# PowerShell 명령어로 실행\nresult = subprocess.run(['powershell.exe', 'Get-Process | Select-Object Name, Id, CPU, WS'], capture_output=True, text=True)\n\n# 출력 결과를 화면에 표시\nprint(result.stdout)"
+  },
+{
+    "input": "메모리 사용량 프로그램 목록",
+    "code": "import subprocess\n\n# 실행 중인 프로그램 목록 가져오기\nprint('메모리 사용량 기준으로 실행 중인 프로그램 목록을 불러옵니다...')\n\n# PowerShell 명령어 실행\nresult = subprocess.check_output(['powershell.exe', 'Get-Process | Sort-Object WS -Descending | Select-Object -First 15 | Format-Table -Property Name, Id, WS'], shell=True, encoding='cp949')\n\n# 결과 출력\nprint(result)\n\n# 종료할 프로그램 선택\nchoice = input('가장 많이 사용하는 프로그램을 종료하시겠습니까? (y/n): ')\n\nif choice.lower() == 'y':\n    # 가장 첫 번째 프로그램의 PID 추출\n    lines = result.strip().split('\\n')\n    if len(lines) > 3:\n        first_program = lines[3].split()\n        program_name = first_program[0]\n        program_id = first_program[1]\n        print(f'{program_name} (PID: {program_id}) 프로그램을 종료합니다...')\n        subprocess.call(['taskkill', '/PID', program_id, '/F'])\n        print(f'{program_name} 프로그램이 종료되었습니다.')\nelse:\n    print('프로그램 종료를 취소했습니다.')"
+  },
+  {
+    "input": "파일 압축하기",
+    "code": "import zipfile\nimport os\n\n# 압축할 폴더 경로 설정\nfolder_to_zip = 'C:/Users/lgw22/PycharmProjects/ex001'\nzip_filename = 'C:/Users/lgw22/PycharmProjects/ex001/ex001.zip'\n\n# 압축 시작\nwith zipfile.ZipFile(zip_filename, 'w') as zipf:\n    for root, dirs, files in os.walk(folder_to_zip):\n        for file in files:\n            file_path = os.path.join(root, file)\n            zipf.write(file_path, os.path.relpath(file_path, folder_to_zip))\n\nprint(f'{folder_to_zip} 폴더가 {zip_filename}으로 압축되었습니다.')"
+  },
+    {
+    "input": "오래된 파일 정리",
+    "code": "import os\nimport time\n\n# 정리할 폴더 경로 설정\nfolder_path = 'C:/Users/lgw22/PycharmProjects/ex001'\n\n# 파일 리스트 가져오기\nfiles = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]\n\n# 수정 시간 기준으로 정렬\nfiles.sort(key=lambda x: os.path.getmtime(x))\n\n# 파일 목록 출력\nprint('파일 목록 (오래된 순서):')\nfor file in files:\n    modification_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(file)))\n    print(f'{modification_time} - {os.path.basename(file)}')\n\nif files:\n    # 가장 오래된 파일 찾기\n    oldest_file = files[0]\n    modification_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(oldest_file)))\n    print(f'가장 오래된 파일 삭제: {modification_time} - {os.path.basename(oldest_file)}')\n    os.remove(oldest_file)\n    print(f'{os.path.basename(oldest_file)} 파일이 삭제되었습니다.')\nelse:\n    print('삭제할 파일이 없습니다.')"
+  },
+  {
+    "input": "용량 큰 순서 정렬",
+    "code": "import os\n\n# 정리할 폴더 경로 설정 (압축할 때와 동일한 경로)\nfolder_path = 'C:/Users/lgw22/PycharmProjects/ex001'\n\n# 파일 리스트 가져오기\nfiles = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]\n\n# 파일 크기 기준으로 정렬\nfiles.sort(key=lambda x: os.path.getsize(x), reverse=True)\n\nprint('용량 큰 순서대로 정리:')\nfor file in files:\n    size_mb = os.path.getsize(file) / (1024 * 1024)\n    print(f'{size_mb:.2f} MB - {os.path.basename(file)}')"
+  },
+   {
+    "input": "휴지통 비우기",
+    "code": "import os\n\n# PowerShell 명령어를 사용하여 휴지통 비우기\nprint('휴지통을 비우는 중입니다...')\nos.system('PowerShell.exe -Command \"Clear-RecycleBin -Force\"')\nprint('휴지통이 모두 비워졌습니다.')"
+  },
+  {
+    "input": "중복 파일 정리",
+    "code": "import os\nimport re\n\n# 정리할 폴더 경로 설정\nfolder_path = r'C:\\Users\\lgw22\\PycharmProjects\\ex001'\n\n# 파일 리스트 가져오기\nfiles = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]\n\n# 원본 파일 찾기\noriginal_files = set()\nfor file in files:\n    # 중복 파일 패턴 확인 (example (1).txt, example (2).txt)\n    match = re.match(r'^(.*?)(?: \\(\\d+\\))?\\.(\\w+)$', file)\n    if match:\n        base_name = f'{match.group(1)}.{match.group(2)}'\n        original_files.add(base_name)\n\n# 중복 파일 삭제하기\nfor file in files:\n    match = re.match(r'^(.*?)(?: \\(\\d+\\))?\\.(\\w+)$', file)\n    if match:\n        base_name = f'{match.group(1)}.{match.group(2)}'\n        if base_name in original_files and file != base_name:\n            full_path = os.path.join(folder_path, file)\n            print(f'{file} 파일이 삭제되었습니다.')\n            os.remove(full_path)\n"
+  },
+  {
+    "input": "특정 폴더 파일 삭제",
+    "code": "import os\n\n# 사용자로부터 경로 입력 받기\nfolder_path = input('삭제할 폴더 경로를 입력하세요: ')\n\n# 폴더가 존재하는지 확인\nif os.path.exists(folder_path):\n    # 폴더 내부 파일 목록 가져오기\n    files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]\n    \n    if files:\n        print('다음 파일들이 삭제됩니다:')\n        for file in files:\n            print(f'- {file}')\n        \n        # 삭제 실행\n        for file in files:\n            os.remove(file)\n            print(f'{file} 파일이 삭제되었습니다.')\n        print('모든 파일이 삭제되었습니다.')\n    else:\n        print('폴더가 비어 있습니다.')\nelse:\n    print('지정된 폴더가 존재하지 않습니다.')"
+  },
+   {
+    "input": "폴더 백업 (Windows 작업 스케줄러)",
+    "code": "import zipfile\nimport os\nfrom datetime import datetime\n\n# 백업할 폴더 경로 설정\nsource_folder = 'C:/Users/lgw22/PycharmProjects/ex001'\n\n# 백업이 저장될 폴더 경로 설정\nbackup_folder = 'D:/Backup'\n\n# 백업 폴더가 없으면 생성\nif not os.path.exists(backup_folder):\n    os.makedirs(backup_folder)\n\n# 폴더명 추출\nfolder_name = os.path.basename(source_folder)\n\n# 현재 시간으로 파일명 생성\ntimestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')\nbackup_filename = f'{backup_folder}/{timestamp}_{folder_name}.zip'\n\n# ZIP 파일로 압축 시작\nwith zipfile.ZipFile(backup_filename, 'w') as zipf:\n    for root, dirs, files in os.walk(source_folder):\n        for file in files:\n            file_path = os.path.join(root, file)\n            zipf.write(file_path, os.path.relpath(file_path, source_folder))\n\nprint(f'백업이 완료되었습니다: {backup_filename}')"
+  },
+   {
+    "input": "IP 주소 확인",
+    "code": "import socket\n\n# 로컬 IP 주소 확인\nip_address = socket.gethostbyname(socket.gethostname())\n\nprint(f'현재 사용 중인 IP 주소: {ip_address}')"
+  },
+  {
+    "input": "인터넷 연결 확인",
+    "code": "import socket\n\n# 인터넷 연결 상태 확인\ntry:\n    socket.create_connection(('8.8.8.8', 53), timeout=5)\n    print('인터넷에 연결되어 있습니다.')\nexcept OSError:\n    print('인터넷에 연결되어 있지 않습니다.')"
   }
 ]
