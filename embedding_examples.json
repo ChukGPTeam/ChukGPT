@@ -1,10 +1,82 @@
 [
   {
-    "input": "디렉토리 안에 있는 파일들을 보여줘",
-    "code": "import os\nprint(os.listdir())"
+    "input": "화면밝기 100",
+    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 100)', shell=True)"
   },
   {
-    "input": "현재 시간을 알려줘",
-    "code": "import datetime\nprint(datetime.datetime.now())"
+    "input": "화면밝기 50",
+    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 50)', shell=True)"
+  },
+  {
+    "input": "화면밝기 0",
+    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 0)', shell=True)"
+  },
+  {
+  "input": "소리 100",
+  "code": "from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume; from ctypes import cast, POINTER; from comtypes import CLSCTX_ALL; devices = AudioUtilities.GetSpeakers(); interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None); volume = cast(interface, POINTER(IAudioEndpointVolume)); volume.SetMasterVolumeLevelScalar(1.0, None); print('시스템 볼륨이 100%로 설정되었습니다.')"
+  },
+  {
+  "input": "소리 50",
+  "code": "from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume; from ctypes import cast, POINTER; from comtypes import CLSCTX_ALL; devices = AudioUtilities.GetSpeakers(); interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None); volume = cast(interface, POINTER(IAudioEndpointVolume)); volume.SetMasterVolumeLevelScalar(0.5, None); print('시스템 볼륨이 50%로 설정되었습니다.')"
+  },
+  {
+  "input": "소리 0",
+  "code": "from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume; from ctypes import cast, POINTER; from comtypes import CLSCTX_ALL; devices = AudioUtilities.GetSpeakers(); interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None); volume = cast(interface, POINTER(IAudioEndpointVolume)); volume.SetMasterVolumeLevelScalar(0.0, None); print('시스템 볼륨이 0%로 설정되었습니다.')"
+  },
+  {
+  "input": "와이파이 설정",
+  "code": "import os\nos.system('start ms-settings:network-wifi')"
+  },
+  {
+  "input": "와이파이 연결 해제",
+  "code": "import os\nresult = os.system('netsh wlan disconnect')\nif result == 0:\n    print('Wi-Fi 연결이 정상적으로 해제되었습니다.')\nelse:\n    print('Wi-Fi 연결 해제에 실패했습니다.')"
+  },
+  {
+  "input": "CPU 사용률",
+  "code": "import subprocess\nresult = subprocess.check_output('wmic cpu get loadpercentage', shell=True, encoding='utf-8')\nlines = result.split('\\n')\nusage_values = [line.strip() for line in lines if line.strip().isdigit()]\nif usage_values:\n    print(f'{usage_values[0]}%')\nelse:\n    print('CPU 사용률 정보를 가져오지 못했습니다.')"
+  },
+  {
+  "input": "디스크 용량",
+  "code": "import subprocess\nresult = subprocess.check_output('wmic logicaldisk get caption,freespace,size', shell=True, encoding='utf-8')\nlines = result.strip().split('\\n')\nprint('디스크 용량 정보:')\nfor line in lines[1:]:\n    parts = line.split()\n    if len(parts) == 3:\n        drive, free, total = parts\n        if free.isdigit() and total.isdigit():\n            free_gb = int(free) // (1024 ** 3)\n            total_gb = int(total) // (1024 ** 3)\n            print(f'{drive}: {free_gb}GB / {total_gb}GB')"
+  },
+  {
+  "input": "인터넷 속도 측정",
+  "code": "import subprocess\nimport time\nprint('인터넷 속도를 측정 중입니다... 잠시만 기다려주세요.')\nurl = 'http://speedtest.tele2.net/10MB.zip'\nstart_time = time.time()\nsubprocess.run(f'powershell Invoke-WebRequest -Uri \"{url}\" -OutFile NUL', shell=True)\nend_time = time.time()\ntime_taken = end_time - start_time\nif time_taken > 0:\n    download_speed = 10 / time_taken\n    print(f'다운로드 속도: {download_speed:.2f} MB/s')\nelse:\n    print('인터넷 속도 측정에 실패했습니다.')"
+  },
+  {
+  "input": "크롬 강제 종료",
+  "code": "import os\nprint('Chrome 브라우저를 강제로 종료합니다...')\nos.system('taskkill /F /IM chrome.exe')\nprint('모든 Chrome 프로세스가 종료되었습니다.')"
+  },
+  {
+  "input": "실행중인 프로그램",
+  "code": "import subprocess\n\nprint('현재 실행 중인 앱 (MainWindowTitle 있음):')\nresult = subprocess.run(['powershell.exe', 'Get-Process | Where-Object { $_.MainWindowTitle } | Select-Object Name, Id, MainWindowTitle'], capture_output=True, text=True)\nprint(result.stdout)"
+  },
+  {
+  "input": "파일 압축",      "_comment" : "폴더안에 압축파일 저장",
+  "code": "import zipfile\nimport os\nfrom tkinter import simpledialog\nfolder_path = simpledialog.askstring('폴더 경로 입력', '압축할 폴더 경로를 입력하세요:')\nif not folder_path:\n    print('❌ 경로가 입력되지 않았습니다.')\nelse:\n    folder_path = folder_path.strip('\"')\n    if not os.path.isdir(folder_path):\n        print('❌ 유효한 폴더 경로가 아닙니다.')\n    else:\n        folder_name = os.path.basename(folder_path.rstrip('/\\\\'))\n        zip_filename = os.path.join(folder_path, folder_name + '.zip')\n        file_paths = []\n        for root, _, files in os.walk(folder_path):\n            for file in files:\n                path = os.path.join(root, file)\n                if path != zip_filename:\n                    file_paths.append((path, os.path.relpath(path, folder_path)))\n        zipf = zipfile.ZipFile(zip_filename, 'w')\n        for full, rel in file_paths:\n            zipf.write(full, rel)\n        zipf.close()\n        print('✅ 압축 완료:', zip_filename)"
+  },
+  {
+  "input": "압축 풀기",      "_comment" : "폴더 경로를 복사하면 큰 따음표가 붙어 나오니 삭제할 것",
+  "code": "import zipfile\nimport os\nfrom tkinter import simpledialog\nzip_path = simpledialog.askstring('압축 파일 경로 입력', '압축을 풀 zip 파일의 경로를 입력하세요:')\nif not zip_path:\n    print('❌ 경로가 입력되지 않았습니다.')\nelif not os.path.isfile(zip_path) or not zip_path.endswith('.zip'):\n    print('❌ 유효한 zip 파일 경로가 아닙니다.')\nelse:\n    extract_dir = os.path.splitext(zip_path)[0]  # 확장자 없는 폴더 이름\n    os.makedirs(extract_dir, exist_ok=True)\n    with zipfile.ZipFile(zip_path, 'r') as zipf:\n        zipf.extractall(extract_dir)\n    print('✅ 압축이 풀렸습니다:', extract_dir)"
+  },
+  {
+  "input": "가장 오래된 파일 정리",
+  "code": "import os\nimport time\nfrom tkinter import simpledialog\nfolder_path = simpledialog.askstring('폴더 경로 입력', '정리할 폴더 경로를 입력하세요:')\nif not folder_path or not os.path.isdir(folder_path):\n    print('❌ 유효한 폴더 경로가 아닙니다.')\nelse:\n    files = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]\n    if not files:\n        print('❌ 폴더 내에 삭제할 파일이 없습니다.')\n    else:\n        files.sort(key=lambda x: os.path.getmtime(x))\n        print('📄 파일 목록 (오래된 순):')\n        for file in files:\n            mtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(os.path.getmtime(file)))\n            print(f'{mtime} - {os.path.basename(file)}')\n        oldest = files[0]\n        os.remove(oldest)\n        print(f'🗑️ 가장 오래된 파일 삭제 완료: {os.path.basename(oldest)}')"
+  },
+  {
+  "input": "중복 파일 정리",
+  "code": "import os\nimport re\nfrom tkinter import simpledialog\nfolder_path = simpledialog.askstring('폴더 경로 입력', '정리할 폴더 경로를 입력하세요:')\nif not folder_path or not os.path.isdir(folder_path):\n    print('❌ 유효한 폴더 경로가 아닙니다.')\nelse:\n    files = os.listdir(folder_path)\n    originals = set()\n    duplicates = []\n    for f in files:\n        match = re.match(r'^(.*?)( - 복사본)?(\\..+)?$', f)\n        if match:\n            base = (match.group(1) or '') + (match.group(3) or '')\n            if ' - 복사본' in f:\n                duplicates.append(f)\n            else:\n                originals.add(base)\n    for f in duplicates:\n        match = re.match(r'^(.*?)( - 복사본)?(\\..+)?$', f)\n        if match:\n            base = (match.group(1) or '') + (match.group(3) or '')\n            if base in originals:\n                full_path = os.path.join(folder_path, f)\n                os.remove(full_path)\n                print(f'🗑️ 중복 파일 삭제됨: {f}')\n    if not duplicates:\n        print('✅ 삭제할 복사본이 없습니다.')"
+  },
+  {
+  "input": "휴지통 비우기",
+  "code": "import os\nprint('🗑️ 휴지통을 비우는 중입니다...')\nos.system('powershell -Command \"Clear-RecycleBin -Force\"')\nprint('✅ 휴지통이 모두 비워졌습니다.')"
+  },
+  {
+  "input": "IP 주소 ",
+  "code": "import subprocess; result = subprocess.run(['ipconfig'], capture_output=True, text=True, shell=True); print(result.stdout)"
+  },
+  {
+    "input": "인터넷 연결 확인",
+    "code": "import socket\ntry:\n    socket.create_connection(('8.8.8.8', 53), timeout=5)\n    print('인터넷에 연결되어 있습니다.')\nexcept OSError:\n    print('인터넷에 연결되어 있지 않습니다.')"
   }
 ]
