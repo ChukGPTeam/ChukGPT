@@ -1,34 +1,14 @@
 [
-  {
-    "input": "화면밝기 100",
-    "description": "화면 밝기를 100%로 설정합니다.",
-    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 100)', shell=True)"
-  },
-  {
-    "input": "화면밝기 50",
-    "description": "화면 밝기를 50%로 설정합니다.",
-    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 50)', shell=True)"
-  },
-  {
-    "input": "화면밝기 0",
-    "description": "화면 밝기를 0%로 설정합니다.",
-    "code": "import subprocess\nsubprocess.run('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, 0)', shell=True)"
-  },
-  {
-    "input": "소리 100",
-    "description": "시스템 볼륨을 100%로 설정합니다.",
-    "code": "from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume; from ctypes import cast, POINTER; from comtypes import CLSCTX_ALL; devices = AudioUtilities.GetSpeakers(); interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None); volume = cast(interface, POINTER(IAudioEndpointVolume)); volume.SetMasterVolumeLevelScalar(1.0, None); print('시스템 볼륨이 100%로 설정되었습니다.')"
-  },
-  {
-    "input": "소리 50",
-    "description": "시스템 볼륨을 50%로 설정합니다.",
-    "code": "from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume; from ctypes import cast, POINTER; from comtypes import CLSCTX_ALL; devices = AudioUtilities.GetSpeakers(); interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None); volume = cast(interface, POINTER(IAudioEndpointVolume)); volume.SetMasterVolumeLevelScalar(0.5, None); print('시스템 볼륨이 50%로 설정되었습니다.')"
-  },
-  {
-    "input": "소리 0",
-    "description": "시스템 볼륨을 0%로 설정합니다.",
-    "code": "from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume; from ctypes import cast, POINTER; from comtypes import CLSCTX_ALL; devices = AudioUtilities.GetSpeakers(); interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None); volume = cast(interface, POINTER(IAudioEndpointVolume)); volume.SetMasterVolumeLevelScalar(0.0, None); print('시스템 볼륨이 0%로 설정되었습니다.')"
-  },
+    {
+        "input": "화면 밝기 {num}",
+        "code": "import os\nos.system('powershell.exe (Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1,{num})')",
+        "description": "화면 밝기를 0부터 100 사이 숫자로 조정합니다."
+    },
+    {
+      "input": "소리 크기 {num}",
+    "code":  "from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume\nfrom ctypes import cast, POINTER\nfrom comtypes import CLSCTX_ALL\ndevices = AudioUtilities.GetSpeakers()\ninterface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)\nvolume = cast(interface, POINTER(IAudioEndpointVolume))\nvolume.SetMasterVolumeLevelScalar({num}/100.0, None)",
+    "description": "소리 볼륨을 {num}으로 설정합니다 (0~100)."
+    },
   {
     "input": "와이파이 설정",
     "description": "와이파이 설정 화면을 엽니다.",
@@ -108,5 +88,11 @@
     "input": "시스템 종료",
     "description": "컴퓨터를 즉시 종료합니다.",
     "code": "import os\nprint('💻 시스템 종료 중...')\nos.system('shutdown /s /t 0')"
-  }
+  },
+{
+  "input": "날씨가 어때",
+  "code": "import tkinter as tk\nfrom tkinter import simpledialog\nimport webbrowser\n\ndef run():\n    root = tk.Tk()\n    root.withdraw()\n    region = simpledialog.askstring('지역 입력', '날씨를 알고 싶은 지역명을 입력하세요:')\n    if region:\n        url = f'https://search.naver.com/search.naver?query={region}+날씨'\n        webbrowser.open(url)\n        print(f'{region} 날씨를 검색합니다.')\n    else:\n        print('지역명이 입력되지 않았습니다.')\n\nrun()",
+  "description": "GUI 창으로 지역명을 입력받아 해당 지역 날씨를 웹으로 검색합니다."
+}
+
 ]

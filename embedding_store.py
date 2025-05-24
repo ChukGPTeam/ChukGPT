@@ -1,73 +1,55 @@
-from openai import OpenAI
-import faiss
-import numpy as np
 import json
-from config import OPENAI_API_KEY, EMBEDDING_MODEL
-
-client = OpenAI(api_key=OPENAI_API_KEY)
+import os
+import re
+import difflib
 
 class EmbeddingStore:
-    def __init__(self, example_file="embedding_examples.json", fewshot_file="fewshot_examples.json"):
-        self.examples = self.load_examples(example_file)
-        self.fewshot_examples = self.load_examples(fewshot_file)
-        self.texts = [ex["input"] for ex in self.examples]
-        self.index = None
-        self.embeddings = self.compute_embeddings()
-
-    def load_examples(self, path):
+    def __init__(self, path="embedding_examples.json"):
+        # JSON 파일에서 명령어 예제 불러오기
         with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            self.examples = json.load(f)
 
-    def compute_embeddings(self):
-        if not self.texts:
-            raise ValueError("No example texts to embed.")
-        response = client.embeddings.create(
-            model=EMBEDDING_MODEL,
-            input=self.texts
-        )
-        vectors = [d.embedding for d in response.data]
-        self.index = faiss.IndexFlatL2(len(vectors[0]))
-        self.index.add(np.array(vectors).astype("float32"))
-        return vectors
+    def normalize(self, text):
+        """
+        숫자를 {num}으로 치환하여 비교를 위한 정규화 수행
+        예: "화면 밝기 80" -> "화면 밝기 {num}"
+        """
+        return re.sub(r"\d+", "{num}", text)
 
-    def get_fewshot_examples(self):
-        return self.fewshot_examples
+    def search_and_decide(self, user_input):
+        normalized_input = self.normalize(user_input)
 
-    def search_and_decide(self, query, direct_threshold=0.1, similarity_threshold=0.5):
-        # Get query embedding
-        response = client.embeddings.create(
-            model=EMBEDDING_MODEL,
-            input=query
-        )
-        query_vector = np.array(response.data[0].embedding).astype("float32").reshape(1, -1)
+        inputs = [ex["input"] for ex in self.examples]
+        normalized_inputs = [self.normalize(inp) for inp in inputs]
 
-        distances, indices = self.index.search(query_vector, 1)
-        closest_distance = distances[0][0]
-        closest_index = indices[0][0]
+        # 가장 비슷한 정규화된 명령어 찾기
+        matches = difflib.get_close_matches(normalized_input, normalized_inputs, n=1, cutoff=0.6)
 
-        similarity = 1 - closest_distance  # 대략적으로 거리를 유사도로 변환 (IndexFlatL2는 거리임)
-
-        matched_example = self.examples[closest_index]
-
-        if closest_distance < direct_threshold:
-            # 아주 가까운 매칭
-            return {
-                "type": "direct",
-                "code": matched_example["code"],
-                "description": matched_example.get("description", "정확한 명령어입니다."),
-            }
-        elif similarity >= similarity_threshold:
-            # 유사도 적당히 높은 경우, 사용자에게 확인 후 실행
-            return {
-                "type": "confirm",
-                "code": matched_example["code"],
-                "description": matched_example.get("description", "유사한 명령어입니다."),
-                "matched_input": matched_example["input"],
-                "similarity": similarity,
-            }
-        else:
-            # 유사도 낮음 → GPT 코드 생성 요청
+        if not matches:
+            # GPT로 위임
             return {
                 "type": "gpt",
-                "examples": self.get_fewshot_examples()
+                "examples": self.examples
             }
+
+        match = matches[0]
+        matched_index = normalized_inputs.index(match)
+        example = self.examples[matched_index]
+
+        if match == normalized_input:
+            # 완전 일치
+            return {
+                "type": "direct",
+                "matched_input": inputs[matched_index],
+                "description": example.get("description", ""),
+                "code": example["code"]
+            }
+
+        # 유사하지만 확인 필요
+        return {
+            "type": "confirm",
+            "matched_input": inputs[matched_index],
+            "similarity": difflib.SequenceMatcher(None, normalized_input, match).ratio(),
+            "description": example.get("description", ""),
+            "code": example["code"]
+        }

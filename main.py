@@ -8,7 +8,7 @@ def main():
     store = EmbeddingStore()
 
     while True:
-        user_input = input("💬 사용자 입력 (종료: quit): ").strip()
+        user_input = input("\n💬 사용자 입력 (종료: quit): ").strip()
         if user_input.lower() in ("quit", "exit"):
             print("프로그램 종료합니다.")
             break
@@ -17,8 +17,6 @@ def main():
 
         if result["type"] == "direct":
             print(f"\n✅ 명령어 설명:\n{result.get('description', '정확한 명령어입니다.')}")
-            print("\n⚡ 직접 실행 코드:\n")
-            print(result["code"])
             code_executor.execute_code(result["code"])
 
         elif result["type"] == "confirm":
@@ -36,7 +34,7 @@ def main():
             code = ask_gpt(prompt)
             print("\n🤖 GPT가 생성한 코드입니다.")
             print("설명: 이 코드는 요청하신 작업을 수행합니다.")
-            print(code)
+            print("code")
             confirm = input("이 코드를 실행하시겠습니까? (y/n): ").strip().lower()
             if confirm == "y":
                 code_executor.execute_code(code)
