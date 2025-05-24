@@ -1,15 +1,13 @@
-
-import tkinter as tk
-from tkinter import scrolledtext
+import customtkinter as ctk
 import json
 import io
 import sys
 
-# JSON 파일 로드
+# JSON 명령어 로드
 with open("embedding_examples.json", "r", encoding="utf-8") as f:
     command_db = json.load(f)
 
-# 명령어 매칭 및 실행 함수
+# 명령어 처리
 def find_and_execute(prompt):
     for item in command_db:
         if item["input"] == prompt:
@@ -25,34 +23,71 @@ def find_and_execute(prompt):
                 sys.stdout = old_stdout
                 return item["code"], f"실행 중 오류 발생: {e}"
     return None, "❌ 해당 명령을 찾을 수 없습니다."
-# GUI 생성
-window = tk.Tk()
-window.title("AI 시스템 제어 GUI")
-window.geometry("700x600")
 
-# 프롬프트 입력창
-tk.Label(window, text="명령어 입력:").pack(anchor="w", padx=10)
-prompt_input = scrolledtext.ScrolledText(window, height=3)
-prompt_input.pack(fill="x", padx=10, pady=5)
+
+# 기본 설정
+ctk.set_appearance_mode("Light")  # "Dark", "Light", "System"
+ctk.set_default_color_theme("blue")  # "blue", "green", "dark-blue"
+
+# 메인 윈도우
+window = ctk.CTk()
+window.geometry("500x600")
+window.title("AI 시스템 제어 GUI")
+
+# 테마 토글
+def toggle_theme():
+    current = ctk.get_appearance_mode()
+    if current == "Light":
+        ctk.set_appearance_mode("Dark")
+        theme_button.configure(text="☀️ 라이트 모드")
+    else:
+        ctk.set_appearance_mode("Light")
+        theme_button.configure(text="🌙           다크 모드")
+
+# 상단 프레임
+top_frame = ctk.CTkFrame(window, fg_color="transparent")
+top_frame.pack(fill="x", pady=(15, 5), padx=15)
+
+label_prompt = ctk.CTkLabel(top_frame, text="명령어 입력:", font=ctk.CTkFont(size=14, weight="bold"))
+label_prompt.pack(side="left")
+
+theme_button = ctk.CTkButton(
+    top_frame,
+    text="🌙           다크 모드",
+    width=120,
+    height=32,
+    corner_radius=10,
+    command=toggle_theme
+)
+theme_button.pack(side="right")
+
+# 사용자 입력창
+prompt_input = ctk.CTkTextbox(window, height=70, corner_radius=10)
+prompt_input.pack(fill="x", padx=15, pady=5)
+
+# 결과 라벨
+label_result = ctk.CTkLabel(window, text="결과:", font=ctk.CTkFont(size=14, weight="bold"))
+label_result.pack(anchor="w", padx=15, pady=(10, 0))
 
 # 결과 출력창
-tk.Label(window, text="결과:").pack(anchor="w", padx=10)
-result_display = scrolledtext.ScrolledText(window, height=30, state=tk.DISABLED)
-result_display.pack(fill="both", expand=True, padx=10, pady=5)
+result_display = ctk.CTkTextbox(window, height=350, corner_radius=10)
+result_display.pack(fill="both", expand=True, padx=15, pady=5)
+result_display.configure(state="disabled")
 
 # 실행 함수
-def send_prompt():
-    prompt = prompt_input.get("1.0", tk.END).strip()
+def send_prompt(event=None):
+    prompt = prompt_input.get("0.0", "end").strip()
+    if not prompt:
+        return
     code, result = find_and_execute(prompt)
-    result_display.config(state=tk.NORMAL)
-    result_display.insert(tk.END, f"🧠 입력: {prompt}\n")
+    result_display.configure(state="normal")
+    result_display.insert("end", f"🧠 입력: {prompt}\n📣 결과:\n{result}\n{'-'*60}\n\n")
+    result_display.see("end")
+    result_display.configure(state="disabled")
+    prompt_input.delete("0.0", "end")
 
-    result_display.insert(tk.END, f"📣 결과:\n{result}\n{'-'*50}\n")
-    result_display.config(state=tk.DISABLED)
-    prompt_input.delete("1.0", tk.END)
+# 엔터키 실행
+prompt_input.bind("<Return>", lambda e: (send_prompt(), "break"))
 
-# 전송 버튼
-send_button = tk.Button(window, text="실행", command=send_prompt)
-send_button.pack(pady=10)
-
+# 실행
 window.mainloop()
