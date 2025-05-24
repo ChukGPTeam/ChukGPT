@@ -2,3 +2,5 @@ openai>=1.0.0
 faiss-cpu
 numpy
 python-dotenv
+pycaw #Windows에서 시스템 볼륨 조절을 가능하게 해주는 핵심 라이브러리#
+comtypes #pycaw 내부에서 COM 인터페이스를 사용하기 위해 필요함#
